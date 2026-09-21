@@ -113,7 +113,7 @@ const REMEDIATIONS = {
   clawHavoc: 'Remove the affected skill and rotate any credentials it may have had access to',
 } as const;
 
-const CLAWHAVOC_C2_PATTERN = /(socifiapp\.com|rentry\.co|glot\.io|91\.92\.242\.30|95\.92\.242\.30|96\.92\.242\.30|202\.161\.50\.59|54\.91\.154\.110)/i;
+const CLAWHAVOC_C2_PATTERN = /(?<![\w-])(socifiapp\.com|rentry\.co|glot\.io|91\.92\.242\.30|95\.92\.242\.30|96\.92\.242\.30|202\.161\.50\.59|54\.91\.154\.110)(?![\w-]|\.\w)/i;
 const CLAWHAVOC_CREDENTIAL_TARGET_PATTERN = /\.clawdbot[\\/]\.env/i;
 const CLAWHAVOC_OBFUSCATION_PATTERN = /(base64\s+-d|atob\(|Buffer\.from\([^)]*['"]base64['"]\))[\s\S]{0,120}(curl|wget|sh -c|bash -c|python)/i;
 

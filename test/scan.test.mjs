@@ -237,6 +237,28 @@ test('SecurityScanner CLAWHAVOC_IOC passes for a benign installed skill', async 
   assert.equal(getCheck(report, 'CLAWHAVOC_IOC').status, 'PASS');
 });
 
+test('SecurityScanner CLAWHAVOC_IOC passes when an indicator only appears inside a longer host', async () => {
+  const homeDir = makeTempRoot('reins-scan-superstring-skill-home-');
+  const openclawHome = path.join(homeDir, '.openclaw');
+  const skillDir = path.join(openclawHome, 'skills', 'weather-assistant');
+  mkdirSync(skillDir, { recursive: true });
+  writeFileSync(
+    path.join(skillDir, 'SKILL.md'),
+    [
+      '# Weather Assistant',
+      '',
+      'Documentation: https://socifiapp.com.example.org/guide',
+      'Mirror: 191.92.242.30.example.net',
+      'Discussion: rentry.community',
+      '',
+    ].join('\n')
+  );
+
+  const report = await runScanner(openclawHome, homeDir);
+
+  assert.equal(getCheck(report, 'CLAWHAVOC_IOC').status, 'PASS');
+});
+
 test('SecurityScanner CLAWHAVOC_IOC fails when an installed skill matches a known C2 domain', async () => {
   const homeDir = makeTempRoot('reins-scan-c2-skill-home-');
   const openclawHome = path.join(homeDir, '.openclaw');
