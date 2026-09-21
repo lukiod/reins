@@ -637,13 +637,18 @@ export class SecurityScanner {
     return this.fail('BROWSER_UNSANDBOXED', 'browser is not sandboxed', REMEDIATIONS.browser);
   }
 
-  private async findInstalledSkillFiles(): Promise<ConfigSnapshot[]> {
+  private async findInstalledSkillFiles(): Promise<ConfigSnapshot[] | null> {
     const skillsRoot = path.join(this.openclawHome, 'skills');
     if (!(await fs.pathExists(skillsRoot))) {
       return [];
     }
 
-    const entries = await fs.readdir(skillsRoot, { withFileTypes: true });
+    // The root can disappear or lose its read bit between the check and the read.
+    const entries = await fs.readdir(skillsRoot, { withFileTypes: true }).catch(() => null);
+    if (entries === null) {
+      return null;
+    }
+
     const files: ConfigSnapshot[] = [];
     for (const entry of entries) {
       if (!entry.isDirectory()) {
@@ -656,6 +661,14 @@ export class SecurityScanner {
 
   private async checkClawHavocIndicators(): Promise<ScanCheck> {
     const skillFiles = await this.findInstalledSkillFiles();
+    if (skillFiles === null) {
+      return this.warn(
+        'CLAWHAVOC_IOC',
+        'installed skills could not be read, so ClawHavoc indicators were not checked',
+        'Make ~/.openclaw/skills readable by the current user and run the scan again'
+      );
+    }
+
     const affected = skillFiles.find(
       (file) =>
         file.exists &&

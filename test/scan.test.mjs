@@ -259,6 +259,17 @@ test('SecurityScanner CLAWHAVOC_IOC passes when an indicator only appears inside
   assert.equal(getCheck(report, 'CLAWHAVOC_IOC').status, 'PASS');
 });
 
+test('SecurityScanner CLAWHAVOC_IOC warns when the skills directory cannot be read', async () => {
+  const homeDir = makeTempRoot('reins-scan-unreadable-skills-home-');
+  const openclawHome = path.join(homeDir, '.openclaw');
+  mkdirSync(openclawHome, { recursive: true });
+  writeFileSync(path.join(openclawHome, 'skills'), 'not a directory\n');
+
+  const report = await runScanner(openclawHome, homeDir);
+
+  assert.equal(getCheck(report, 'CLAWHAVOC_IOC').status, 'WARN');
+});
+
 test('SecurityScanner CLAWHAVOC_IOC fails when an installed skill matches a known C2 domain', async () => {
   const homeDir = makeTempRoot('reins-scan-c2-skill-home-');
   const openclawHome = path.join(homeDir, '.openclaw');
